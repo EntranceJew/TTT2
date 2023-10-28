@@ -36,4 +36,24 @@ function CLGAMEMODESUBMENU:Populate(parent)
 		convar = "ttt_ironsights_lowered",
 		master = crossEnb
 	})
+
+	form:MakeCheckBox({
+		label = "label_grenade_fuse_meter_ui",
+		convar = "ttt2_grenade_fuse_meter_ui"
+	})
+
+	form:MakeCheckBox({
+		label = "label_grenade_trajectory_ui",
+		convar = "ttt2_grenade_trajectory_ui"
+	})
+
+	form:MakeCheckBox({
+		label = "label_grenade_fuse_meter_ui",
+		convar = "ttt2_grenade_fuse_meter_ui"
+	})
+
+	form:MakeCheckBox({
+		label = "label_grenade_trajectory_ui",
+		convar = "ttt2_grenade_trajectory_ui"
+	})
 end
