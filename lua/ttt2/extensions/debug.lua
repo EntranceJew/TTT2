@@ -66,3 +66,21 @@ function debug.print(message)
 
 	print(printMessage)
 end
+
+function debug.SkipTrace(skipLevels)
+	local depth = {}
+	local level = skipLevels or 1
+	skipLevels = skipLevels or 0
+	while true do
+		local info = debug.getinfo(level, "flLnSu")
+		if not info then break end
+		if info.what ~= "C" then
+			local dat = table.Copy( info )
+			dat.level = level
+			dat.trace_line = string.Trim(string.format("  %d! %s:%d", level - skipLevels, info.short_src, info.currentline))
+			depth[#depth + 1] = dat
+		end
+		level = level + 1
+	end
+	return depth
+end

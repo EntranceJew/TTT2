@@ -41,6 +41,7 @@ TTTFiles = {
 	cl_wepswitch = {file = "cl_wepswitch.lua", on = "client"},
 
 	-- shared files
+	sh_addonchecker = {file = "sh_addonchecker.lua", on = "shared"},
 	sh_armor = {file = "sh_armor.lua", on = "shared"},
 	sh_corpse = {file = "sh_corpse.lua", on = "shared"},
 	sh_decal = {file = "sh_decal.lua", on = "shared"},
@@ -122,7 +123,6 @@ TTTFiles = {
 
 if SERVER then
 	local tmp = { -- server files, don't show them for the client
-		sv_addonchecker = {file = "sv_addonchecker.lua", on = "server"},
 		sv_admin = {file = "sv_admin.lua", on = "server"},
 		sv_armor = {file = "sv_armor.lua", on = "server"},
 		sv_corpse = {file = "sv_corpse.lua", on = "server"},

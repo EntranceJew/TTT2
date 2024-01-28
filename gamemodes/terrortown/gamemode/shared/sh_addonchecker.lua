@@ -9,6 +9,10 @@ ADDON_OUTDATED = 1
 
 addonChecker = addonChecker or {}
 
+addonChecker.cache = {
+	workshop = {},
+}
+
 addonChecker.curatedList = {
 	["656662924"] = { -- Killer Notifier by nerzlakai96
 		alternative = "1367128301",
@@ -632,10 +636,255 @@ addonChecker.curatedList = {
 	}
 }
 
+addonChecker.whitelistPaths = {
+	"lua/.*%.lua",
+	"scenes/.*%.vcd",
+	"particles/.*%.pcf",
+	"resource/fonts/.*%.ttf",
+	"scripts/vehicles/.*%.txt",
+	"resource/localization/.*/.*%.properties",
+	"maps/.*%.bsp",
+	"maps/.*%.lmp",
+	"maps/.*%.nav",
+	"maps/.*%.ain",
+	"maps/thumb/.*%.png",
+	"sound/.*%.wav",
+	"sound/.*%.mp3",
+	"sound/.*%.ogg",
+	"materials/.*%.vmt",
+	"materials/.*%.vtf",
+	"materials/.*%.png",
+	"materials/.*%.jpg",
+	"materials/.*%.jpeg",
+	"materials/colorcorrection/.*%.raw",
+	"models/.*%.mdl",
+	"models/.*%.vtx",
+	"models/.*%.phy",
+	"models/.*%.ani",
+	"models/.*%.vvd",
+	"gamemodes/.*/.*%.txt",
+	"gamemodes/.*/.*%.fgd",
+	"gamemodes/.*/logo%.png",
+	"gamemodes/.*/icon24%.png",
+	"gamemodes/.*/gamemode/.*%.lua",
+	"gamemodes/.*/entities/effects/.*%.lua",
+	"gamemodes/.*/entities/weapons/.*%.lua",
+	"gamemodes/.*/entities/entities/.*%.lua",
+	"gamemodes/.*/backgrounds/.*%.png",
+	"gamemodes/.*/backgrounds/.*%.jpg",
+	"gamemodes/.*/backgrounds/.*%.jpeg",
+	"gamemodes/.*/content/models/.*%.mdl",
+	"gamemodes/.*/content/models/.*%.vtx",
+	"gamemodes/.*/content/models/.*%.phy",
+	"gamemodes/.*/content/models/.*%.ani",
+	"gamemodes/.*/content/models/.*%.vvd",
+	"gamemodes/.*/content/materials/.*%.vmt",
+	"gamemodes/.*/content/materials/.*%.vtf",
+	"gamemodes/.*/content/materials/.*%.png",
+	"gamemodes/.*/content/materials/.*%.jpg",
+	"gamemodes/.*/content/materials/.*%.jpeg",
+	"gamemodes/.*/content/materials/colorcorrection/.*%.raw",
+	"gamemodes/.*/content/scenes/.*%.vcd",
+	"gamemodes/.*/content/particles/.*%.pcf",
+	"gamemodes/.*/content/resource/fonts/.*%.ttf",
+	"gamemodes/.*/content/scripts/vehicles/.*%.txt",
+	"gamemodes/.*/content/resource/localization/.*/.*%.properties",
+	"gamemodes/.*/content/maps/.*%.bsp",
+	"gamemodes/.*/content/maps/.*%.nav",
+	"gamemodes/.*/content/maps/.*%.ain",
+	"gamemodes/.*/content/maps/thumb/.*%.png",
+	"gamemodes/.*/content/sound/.*%.wav",
+	"gamemodes/.*/content/sound/.*%.mp3",
+	"gamemodes/.*/content/sound/.*%.ogg",
+
+	"data_static/.*%.txt",
+	"data_static/.*%.dat",
+	"data_static/.*%.json",
+	"data_static/.*%.xml",
+	"data_static/.*%.csv",
+	"data_static/.*%.dem",
+	"data_static/.*%.vcd",
+
+	"data_static/.*%.vtf",
+	"data_static/.*%.vmt",
+	"data_static/.*%.png",
+	"data_static/.*%.jpg",
+	"data_static/.*%.jpeg",
+
+	"data_static/.*%.mp3",
+	"data_static/.*%.wav",
+	"data_static/.*%.ogg",
+}
+
+addonChecker.domains = {
+	"GAME",
+	"LUA",
+	"lcl",
+	"lsv",
+	"LuaMenu",
+	"DATA",
+	"DOWNLOAD",
+	"garrysmod",
+	"MOD",
+	"BASE_PATH",
+	"EXECUTABLE_PATH",
+	"MOD_WRITE",
+	"GAME_WRITE",
+	"DEFAULT_WRITE_PATH",
+	"THIRDPARTY",
+	"WORKSHOP",
+	"BSP",
+	"GAMEBIN",
+}
+
+function addonChecker.IsPathWhitelisted(path)
+	for i = 1, #addonChecker.whitelistPaths do
+		if string.find(path, addonChecker.whitelistPaths[i]) then
+			return true
+		end
+	end
+end
+
+function addonChecker.FindAllFiles(name, route, all_files, all_dirs, domain)
+	route = route or ""
+
+	all_files = all_files or {}
+	all_dirs = all_dirs or {}
+	local test = route .. "*"
+	local f, d = file.Find(test, domain)
+	for _, _f in ipairs(f or {}) do
+		local rel = route .. _f
+		if addonChecker.IsPathWhitelisted(rel) then
+			table.insert(all_files, rel)
+		end
+	end
+	for _, _d in ipairs(d or {}) do
+		local rel = route .. _d .. "/"
+		addonChecker.FindAllFiles(name, rel, all_files, all_dirs, domain)
+	end
+
+	return all_files, all_dirs
+end
+
+local function FullPathToRelative(gma, gamePath)
+	-- TODO
+	return gma
+end
+
+local function RelativePathToFull(gma, gamePath)
+	-- TODO
+	return gma
+end
+
+local function RelativePathToGMA(gma, gamePath)
+	-- TODO
+	return gma
+end
+
+local function whereis(path)
+	-- TODO
+	local absolutePath = RelativePathToFull( path, "GAME" )
+
+	if ( not absolutePath or not file.Exists( path, "GAME" ) ) then
+		return nil
+	end
+
+	local relativePath = FullPathToRelative( absolutePath, "MOD" )
+
+	-- If the relative path is inside the workshop dir, it's part of a workshop addon
+	if ( relativePath and relativePath:match( "^workshop[\\/].*" ) ) then
+
+		local addonInfo = RelativePathToGMA( path )
+
+		-- Not here? Maybe somebody just put their own file in ./workshop
+		if ( addonInfo ) then
+
+			local addonRelativePath = RelativePathToFull( addonInfo.File )
+
+			return string.format("'%s' - ", addonInfo.Title, addonRelativePath or addonInfo.File )
+
+		end
+
+	end
+
+	return absolutePath
+end
+
+function addonChecker.ScoopAllPaths()
+	-- reverse order, in mount priority
+
+	--[[ TODO: FALLBACKS ]]
+	-- MOD:garrysmod/fallbacks/*
+	-- MOD:garrysmod/fallbacks.vpk
+
+	--[[ TODO: DOWNLOADS ]]
+	-- DOWNLOAD:garrysmod/download/*
+
+	--[[ TODO: GAMECONTENT ]]
+	-- via PrintTable( engine.GetGames() ) -- .mounted .installed .folder
+	-- $mount:garrysmod/../../$title/$mount/**
+
+	--[[ TODO: SOURCESDK ]]
+	-- GAME:garrysmod/platform/*
+	-- GAME:garrysmod/sourceengine/*
+
+	--[[ TODO: GMODCORE ]]
+	-- DATA:garrysmod/data/*
+	-- garrysmod:garrysmod/*
+	-- GAME_WRITE:garrysmod/*
+	-- GAME:garrysmod/*
+	-- DEFAULT_WRITE_PATH:garrysmod/*
+	-- MOD_WRITE:garrysmod/*
+	-- MOD:garrysmod/*
+	-- garrysmod:garrysmod/overrides/*
+	-- GAME:garrysmod/overrides/*
+	-- MOD:garrysmod/overrides/*
+	-- thirdparty:garrysmod/workshop/*
+	-- workshop:garrysmod/workshop/*
+	-- GAME:garrysmod/workshop/*
+
+	--[[ TODO: GMCONTENT ]]
+	-- thirdparty:garrysmod/workshop/gamemodes/base/content/*
+	-- thirdparty:garrysmod/gamemodes/terrortown/content/*
+	-- thirdparty:garrysmod/workshop/gamemodes/terrortown/content/*
+	-- thirdparty:garrysmod/addons/$addon/gamemodes/terrortown/content/*
+
+	--[[ TODO: ADDONCONTENT ]]
+	-- thirdparty:garrysmod/addons/$addon/*
+
+	--[[ TODO: MAP ]]
+	-- GAME:map.pack
+
+	-- [[ TODO: LUA ]]
+	-- lcl:garrysmod/gamemodes/terrortown/entities/*
+	-- lcl:garrysmod/workshop/gamemodes/terrortown/entities/*
+	-- lcl:garrysmod/addons/$addon/gamemodes/terrortown/entities/*
+	-- lcl:garrysmod/gamemodes/base/entities/*
+	-- lcl:garrysmod/workshop/gamemodes/base/entities/*
+	-- lcl:garrysmod/gamemodes/*
+	-- lcl:garrysmod/lua/*
+	-- lcl:garrysmod/workshop/gamemodes/*
+	-- lcl:garrysmod/workshop/lua/*
+	-- lcl:garrysmod/addons/$addon/gamemodes/*
+	-- lcl:garrysmod/addons/$addon/lua/*
+	-- LuaMenu:garrysmod/gamemodes/*
+	-- LuaMenu:garrysmod/lua/*
+
+	-- [[ TODO: ENGINECORE ]]
+	-- PLATFORM:garrysmod/platform/*
+	-- CONFIG:garrysmod/config/*
+	-- LOGDIR:garrysmod/*
+	-- GAMEBIN:garrysmod/bin/*
+	-- BASE_PATH:*
+	-- GAMEBIN:bin/win64/*
+	-- EXECUTABLE_PATH:bin/win64/*
+
+end
+
 ---
 -- This will iterate through all addons in a curated list to notify about known
 -- incompatible / outdated addons and about a working alternative, if one exists.
--- @realm server
+-- @realm shared
 function addonChecker.Check()
 	local addonTable = engine.GetAddons()
 
@@ -647,6 +896,17 @@ function addonChecker.Check()
 	for i = 1, #addonTable do
 		local addon = addonTable[i]
 		if not addon.mounted then continue end
+
+
+		local all_files, all_dirs = {}, {}
+		addonChecker.FindAllFiles(nil, nil, all_files, all_dirs, addon.title)
+		addon.files = all_files
+		addon.whereis = {}
+		for j = 1, #addon.files do
+			addon.whereis[j] = whereis(addon.files[j])
+		end
+
+		addonChecker.cache.workshop[#addonChecker.cache.workshop + 1] = addon
 
 		local detectedAddon = addonChecker.curatedList[tostring(addon.wsid)]
 		if not detectedAddon then continue end
