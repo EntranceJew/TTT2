@@ -6,6 +6,7 @@ All notable changes to TTT2 will be documented here. Inspired by [keep a changel
 
 ### Added
 
+- Added migrations between TTT2-versions, some breaking changes could now be migrated instead
 - Added a new markerVision module that adds information to a specific point in space to replace the old C4 radar; it is currently used by these builtin weapons (by @TimGoll)
   - C4
   - Radio
@@ -87,6 +88,7 @@ All notable changes to TTT2 will be documented here. Inspired by [keep a changel
   - Rendering order is based on distance, no more weird visual glitches
   - Hidden when observing a player in first person view
 - Your own spectator nametag will not display when looking directly up in post-round (by @EntranceJew)
+- Made sure the last weapon is selected by default if the current weapon is removed; overwrite `OnRemove` to prevent that (by @TimGoll)
 
 ### Fixed
 
